@@ -3,6 +3,7 @@
 import { BasicAuthApi, dateToString } from "@jira-apis/jira-api"
 import { writeFileSync } from "fs"
 import { CapexReport, CapexReportRow } from "./CapexReport.js"
+import { toCsvRow } from "./csv.js"
 import { getEnvVar } from "./getEnvVar.js"
 import { Command } from "commander"
 
@@ -87,17 +88,17 @@ async function main() {
         row.assignee !== undefined && row.assignee !== "undefined"
     ) // should move into report class
     .map((row: CapexReportRow) =>
-      [
+      toCsvRow([
         row.epicKey,
         row.epicName,
         row.assignee,
         row.hoursWorked,
         dateToString(row.firstTaskStarted),
         dateToString(row.lastTaskCompleted),
-      ].join(", ")
+      ])
     )
 
-  const report = [headerRow.join(", "), ...csvRows].join("\n")
+  const report = [toCsvRow(headerRow), ...csvRows].join("\n")
   writeFileSync(outputFile, report, { encoding: "utf-8" })
 
   console.log(`\nReport generated successfully: ${outputFile}`)
